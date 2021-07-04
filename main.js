@@ -12,12 +12,18 @@ let idx = 0;
 let playing = false;
 let reset = false;
 
+const startBounds = turf.bbox(
+  turf.buffer(turf.featureCollection(data.features.slice(0, 15)), 1, {
+    steps: 1,
+  })
+);
+
 mapboxgl.accessToken =
   "pk.eyJ1IjoiY3Jpc3RpYW50cnVqaWxsbyIsImEiOiJja29iNnRhNncyd3ZrMndscDNueG91cXZoIn0.3MuxWlOJI8rW1g-8mgb4yA";
 const map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v11",
-  bounds: turf.bbox(turf.buffer(data.features[0], 1)),
+  bounds: startBounds,
   fitBoundsOptions: { padding: boundsPadding },
   maxBounds: [-2.2, 51.6, -0.5, 52.2], // W S E N
 });
@@ -64,7 +70,7 @@ const end = () => {
 const animatePoints = () => {
   const next = data.features[idx];
   const nextLine = line.features[idx];
-  document.getElementById("text").innerText = next.properties.date;
+  document.getElementById("time").innerText = next.properties.date;
 
   live.features.push(next);
   liveLine.features.push(nextLine);
@@ -73,6 +79,9 @@ const animatePoints = () => {
     // eslint-disable-next-line
     el.properties.stamp = numPts - idx + i;
   });
+
+  if (next.properties.msg)
+    document.getElementById("msg").innerText = next.properties.msg;
 
   if (idx % 15 === 0)
     map.fitBounds(
