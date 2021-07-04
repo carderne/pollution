@@ -1,14 +1,16 @@
 /* global data mapboxgl turf */
 
 const boundsPadding = 20;
-const animDelay = 20; // ms
+const animDelay = 30; // ms
 const numPts = data.features.length;
 const boundsLag = 15;
-const boundsLead = 5;
+const boundsLead = 15;
 
 const live = { type: "FeatureCollection", features: [] };
+const liveLine = { type: "FeatureCollection", features: [] };
 let idx = 0;
 let playing = false;
+let reset = false;
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiY3Jpc3RpYW50cnVqaWxsbyIsImEiOiJja29iNnRhNncyd3ZrMndscDNueG91cXZoIn0.3MuxWlOJI8rW1g-8mgb4yA";
@@ -20,51 +22,16 @@ const map = new mapboxgl.Map({
   maxBounds: [-2.2, 51.6, -0.5, 52.2], // W S E N
 });
 
-const start = data.features[0].geometry.coordinates;
-const animatePoints = () => {
-  const next = data.features[idx];
-  document.getElementById("text").innerText = next.properties.date;
-
-  live.features.push(next);
-  data.features.forEach((el, i) => {
-    data.features[i].properties.stamp = numPts - idx + i;
-  });
-
-  map.fitBounds(
-    turf.bbox(
-      turf.buffer(
-        turf.featureCollection(
-          data.features.filter(
-            (el) =>
-              el.properties.stamp > numPts - boundsLag &&
-              el.properties.stamp < numPts + boundsLead
-          )
-        ),
-        1
+const line = turf.featureCollection(
+  data.features
+    .slice(0, -1)
+    .map((e, i) =>
+      turf.lineString(
+        [e.geometry.coordinates, data.features[i + 1].geometry.coordinates],
+        e.properties
       )
-    ),
-    { linear: true, padding: boundsPadding, easing: (t) => t }
-  );
-  map.getSource("point").setData(live);
-
-  // Go slower when further from home
-  const latLng = next.geometry.coordinates;
-  const dist =
-    ((start[0] - latLng[0]) ** 2 + (start[1] - latLng[1]) ** 2) ** 0.5 * 100;
-  const mult = dist < 1 ? 1 : 10;
-
-  idx += 1;
-  if (idx < data.features.length) {
-    if (playing)
-      setTimeout(() => requestAnimationFrame(animatePoints), animDelay * mult);
-  } else {
-    // reset
-    idx = 0;
-    playing = false;
-    live.features = [];
-    document.getElementById("btn").innerText = "Start again";
-  }
-};
+    )
+);
 
 const toggleInteractive = () => {
   if (playing) {
@@ -86,15 +53,117 @@ const toggleInteractive = () => {
   }
 };
 
+const end = () => {
+  idx = 0;
+  playing = false;
+  reset = true;
+  document.getElementById("play").innerText = "Start again";
+  toggleInteractive();
+};
+
+const animatePoints = () => {
+  const next = data.features[idx];
+  const nextLine = line.features[idx];
+  document.getElementById("text").innerText = next.properties.date;
+
+  live.features.push(next);
+  liveLine.features.push(nextLine);
+
+  data.features.forEach((el, i) => {
+    // eslint-disable-next-line
+    el.properties.stamp = numPts - idx + i;
+  });
+
+  if (idx % 15 === 0)
+    map.fitBounds(
+      turf.bbox(
+        turf.buffer(
+          turf.featureCollection(
+            data.features.filter(
+              (el) =>
+                el.properties.stamp > numPts - boundsLag &&
+                el.properties.stamp < numPts + boundsLead
+            )
+          ),
+          1,
+          { steps: 1 }
+        )
+      ),
+      { linear: true, padding: boundsPadding }
+    );
+  map.getSource("point").setData(live);
+  map.getSource("line").setData(liveLine);
+
+  // Go slower when further from home
+  const mult = next.properties.fast ? 1 : 10;
+
+  idx += 1;
+  if (idx < line.features.length) {
+    if (playing)
+      setTimeout(() => requestAnimationFrame(animatePoints), animDelay * mult);
+  } else {
+    // reset
+    end();
+  }
+};
+
+const skip = () => {
+  live.features = data.features;
+  liveLine.features = line.features;
+  map.getSource("point").setData(live);
+  map.getSource("line").setData(liveLine);
+  end();
+};
+
 const togglePlay = () => {
+  if (reset) {
+    reset = false;
+    live.features = [];
+    liveLine.features = [];
+  }
   playing = !playing;
   if (playing) requestAnimationFrame(animatePoints);
-  document.getElementById("btn").innerText = playing ? "Pause" : "Start";
+  document.getElementById("play").innerText = playing ? "Pause" : "Start";
   toggleInteractive();
 };
 
 map.on("load", () => {
-  document.getElementById("btn").onclick = togglePlay;
+  document.getElementById("play").onclick = togglePlay;
+  document.getElementById("skip").onclick = skip;
+
+  map.addSource("line", {
+    type: "geojson",
+    data: liveLine,
+  });
+
+  const colorStyle = [
+    "interpolate",
+    ["linear"],
+    ["get", "NO2_ppb"],
+    0,
+    "#d7b5d8",
+    50,
+    "#df65b0",
+    100,
+    "#dd1c77",
+    289,
+    "#980043",
+  ];
+
+  map.addLayer({
+    id: "line-animation",
+    type: "line",
+    source: "line",
+    layout: {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    paint: {
+      "line-color": colorStyle,
+      "line-width": 7,
+      "line-opacity": 0.8,
+    },
+  });
 
   map.addSource("point", {
     type: "geojson",
@@ -109,37 +178,9 @@ map.on("load", () => {
     paint: {
       "circle-stroke-color": "#ffffff",
       "circle-stroke-width": 2,
-      "circle-radius": [
-        "interpolate",
-        ["exponential", 1.5],
-        ["get", "stamp"],
-        1,
-        8,
-        numPts,
-        20,
-      ],
-      "circle-color": [
-        "interpolate",
-        ["linear"],
-        ["get", "NO2_ppb"],
-        0,
-        "#d7b5d8",
-        50,
-        "#df65b0",
-        100,
-        "#dd1c77",
-        289,
-        "#980043",
-      ],
-      "circle-opacity": [
-        "interpolate",
-        ["exponential", 1.02],
-        ["get", "stamp"],
-        1,
-        0.5,
-        numPts,
-        1.0,
-      ],
+      "circle-radius": 10,
+      "circle-color": colorStyle,
+      "circle-opacity": 0.5,
     },
   });
 
