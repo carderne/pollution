@@ -47,6 +47,9 @@ body {
     right: 0;
     margin: 0 auto;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #time {
@@ -55,8 +58,13 @@ body {
 }
 
 #msg {
+    width: 25ch;
     font-size: 1.5rem;
     text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+    margin: 0.5em;
+    padding: 0.5em;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.3rem;
 }
 
 #play, #skip {
