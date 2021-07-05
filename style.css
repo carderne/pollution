@@ -57,6 +57,18 @@ body {
     text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff;
 }
 
+#no2 {
+    font-size: 2rem;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.3rem;
+    background-color: hsl(300, 31%, 78%);
+}
+
+#no2-val {
+    margin: 0 0.4rem;
+}
+
 #msg {
     width: 25ch;
     font-size: 1.5rem;

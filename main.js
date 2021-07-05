@@ -5,6 +5,8 @@ const get = document.getElementById.bind(document);
 const btnPlay = get("play");
 const btnSkip = get("skip");
 const divTime = get("time");
+const divNO2 = get("no2");
+const spanNO2 = get("no2-val");
 const divMsg = get("msg");
 const divIntro = get("intro");
 
@@ -80,6 +82,13 @@ const end = () => {
   toggleInteractive();
 };
 
+const getColor = (val) => {
+  const h = 300 + ((334 - 300) * val) / 300;
+  const s = 31 + ((100 - 31) * val) / 300;
+  const l = 78 + ((30 - 78) * val) / 300;
+  return `hsl(${h}, ${s}%, ${l}%)`;
+};
+
 const animatePoints = () => {
   const next = data.features[idx];
   const nextLine = line.features[idx];
@@ -88,13 +97,15 @@ const animatePoints = () => {
   live.features.push(next);
   liveLine.features.push(nextLine);
 
-  data.features.forEach((el, i) => {
+  live.features.forEach((el, i) => {
     // eslint-disable-next-line
     el.properties.stamp = numPts - idx + i;
   });
 
-  if (next.properties.msg)
-    divMsg.innerText = next.properties.msg;
+  if (next.properties.msg) divMsg.innerText = next.properties.msg;
+
+  divNO2.style = `background-color: ${getColor(next.properties.NO2_ppb)}`;
+  spanNO2.innerText = next.properties.NO2_ppb;
 
   if (idx % 15 === 0)
     map.fitBounds(
