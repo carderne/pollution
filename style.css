@@ -1,0 +1,80 @@
+* {
+    box-sizing:border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh
+}
+
+#intro {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30ch;
+    margin: 3em;
+    padding: 1em;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 0.3rem;
+}
+
+.hidden {
+    display: none;
+}
+
+@media screen and (max-width: 600px) {
+    #intro {
+        top: 30vh;
+        left: 5vw;
+        width: 90vw;
+        margin: 0;
+    }
+}
+
+#top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#time {
+    font-size: 2rem;
+    text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff;
+}
+
+#msg {
+    font-size: 1.5rem;
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+}
+
+#play, #skip {
+    text-align: center;
+    background-color: rgba(239, 239, 239, 1.0);
+    border: 1px solid black;
+    border-radius: 0.3rem;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.mapboxgl-popup-content > p > span {
+    margin-left: 20px;
+    float: right;
+}
+
+.mapboxgl-popup-content > p:first-child {
+    text-align: center;
+    width: 20ch;
+    margin: auto;
+}

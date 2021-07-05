@@ -1,5 +1,18 @@
 /* global data mapboxgl turf */
 
+const get = document.getElementById.bind(document);
+
+const btnPlay = get("play");
+const btnSkip = get("skip");
+const divTime = get("time");
+const divMsg = get("msg");
+const divIntro = get("intro");
+
+const hideInfo = () => {
+  divIntro.classList.add("hidden");
+};
+divIntro.onclick = hideInfo;
+
 const boundsPadding = 20;
 const animDelay = 30; // ms
 const numPts = data.features.length;
@@ -63,14 +76,14 @@ const end = () => {
   idx = 0;
   playing = false;
   reset = true;
-  document.getElementById("play").innerText = "Start again";
+  btnPlay.innerText = "Start again";
   toggleInteractive();
 };
 
 const animatePoints = () => {
   const next = data.features[idx];
   const nextLine = line.features[idx];
-  document.getElementById("time").innerText = next.properties.date;
+  divTime.innerText = next.properties.date;
 
   live.features.push(next);
   liveLine.features.push(nextLine);
@@ -81,7 +94,7 @@ const animatePoints = () => {
   });
 
   if (next.properties.msg)
-    document.getElementById("msg").innerText = next.properties.msg;
+    divMsg.innerText = next.properties.msg;
 
   if (idx % 15 === 0)
     map.fitBounds(
@@ -132,13 +145,13 @@ const togglePlay = () => {
   }
   playing = !playing;
   if (playing) requestAnimationFrame(animatePoints);
-  document.getElementById("play").innerText = playing ? "Pause" : "Start";
+  btnPlay.innerText = playing ? "Pause" : "Start";
   toggleInteractive();
 };
 
 map.on("load", () => {
-  document.getElementById("play").onclick = togglePlay;
-  document.getElementById("skip").onclick = skip;
+  btnPlay.onclick = togglePlay;
+  btnSkip.onclick = skip;
 
   map.addSource("line", {
     type: "geojson",

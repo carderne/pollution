@@ -7,44 +7,7 @@
         <link href="vendor/mapbox-gl.css" rel="stylesheet">
         <script src="vendor/mapbox-gl.js"></script>
         <script src="vendor/turf.min.js"></script>
-        <style>
-body { margin: 0; padding: 0; }
-#map { position: absolute; top: 0; bottom: 0; width: 100vw; height: 100vh }
-#top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    text-align: center;
-    font-family: Arial, Helvetica, sans-serif;
-}
-#time {
-    font-size: 2rem;
-    text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff;
-}
-#msg {
-    font-size: 1.5rem;
-    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
-}
-#play, #skip {
-    text-align: center;
-    background-color: rgba(239, 239, 239, 1.0);
-    border: 1px solid black;
-    border-radius: 0.3rem;
-    font-size: 2rem;
-    cursor: pointer;
-}
-.mapboxgl-popup-content > p > span {
-    margin-left: 20px;
-    float: right;
-}
-.mapboxgl-popup-content > p:first-child {
-    text-align: center;
-    width: 20ch;
-    margin: auto;
-}
-        </style>
+        <link href="style.css" rel="stylesheet">
     </head>
     <body>
         <div id="map"></div>
@@ -53,6 +16,12 @@ body { margin: 0; padding: 0; }
             <button id="play" type="button">Start</button>
             <button id="skip" type="button">Skip</button>
             <div id="msg"></div>
+        </div>
+        <div id="intro">
+          <p>One week of pollution data in Oxford.</p>
+          <p>When the animation is paused, you can scroll around like a normal map, and hover/click the circles to get more pollution info.</p>
+          <p>The lines are coloured by NO2 levels (more crimson = more bad).</p>
+          <p><strong>Click this box to hide it!</strong></p>
         </div>
         <script src="./data.js"></script>
         <script src="./main.js"></script>
