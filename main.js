@@ -17,7 +17,6 @@ divIntro.onclick = hideInfo;
 
 const boundsPadding = 20;
 const animDelay = 30; // ms
-const numPts = data.features.length;
 const boundsLag = 15;
 const boundsLead = 15;
 
@@ -97,11 +96,6 @@ const animatePoints = () => {
   live.features.push(next);
   liveLine.features.push(nextLine);
 
-  live.features.forEach((el, i) => {
-    // eslint-disable-next-line
-    el.properties.stamp = numPts - idx + i;
-  });
-
   if (next.properties.msg) divMsg.innerText = next.properties.msg;
 
   divNO2.style = `background-color: ${getColor(next.properties.NO2_ppb)}`;
@@ -113,9 +107,7 @@ const animatePoints = () => {
         turf.buffer(
           turf.featureCollection(
             data.features.filter(
-              (el) =>
-                el.properties.stamp > numPts - boundsLag &&
-                el.properties.stamp < numPts + boundsLead
+              (el, i) => i > idx - boundsLag && i < idx + boundsLead
             )
           ),
           1,
